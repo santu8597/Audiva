@@ -565,107 +565,109 @@ const LiveAudio: React.FC = () => {
           </div>
         </div>
 
-        {/* Enhanced Audio Visualizer with Mic and Particles */}
+        {/* Enhanced Audio Visualizer with Glowing Animations */}
         {inputNode && outputNode && (
           <div className="mb-8 flex items-center justify-center">
-            <div className="relative size-80 md:size-96 rounded-full bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center overflow-hidden">
+            <div className="relative size-80 md:size-96 rounded-full bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center">
               
-              {/* Particle Ring Animation */}
-              <div className="absolute inset-0">
-                {Array.from({ length: 60 }, (_, i) => {
-                  const angle = (i * 6) * (Math.PI / 180); // 60 particles, 6 degrees apart
-                  const radius = 140 + (audioLevels[i % 32] || 0) * 0.5; // Responsive radius
-                  const x = Math.cos(angle) * radius;
-                  const y = Math.sin(angle) * radius;
-                  const size = 2 + (frequencyData[i % 24] || 0) * 0.1;
-                  const opacity = isRecording ? 0.6 + (audioLevels[i % 32] || 0) * 0.01 : 0.3;
-                  
-                  return (
-                    <div
-                      key={i}
-                      className="absolute w-1 h-1 bg-primary rounded-full transition-all duration-200 ease-out"
-                      style={{
-                        left: `calc(50% + ${x}px)`,
-                        top: `calc(50% + ${y}px)`,
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        opacity: opacity,
-                        transform: isRecording 
-                          ? `scale(${1 + (audioLevels[i % 32] || 0) * 0.02}) rotate(${Date.now() * 0.05 + i * 6}deg)`
-                          : `scale(1) rotate(${Date.now() * 0.02 + i * 6}deg)`,
-                        transformOrigin: 'center'
-                      }}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Secondary Particle Ring */}
-              <div className="absolute inset-0">
-                {Array.from({ length: 40 }, (_, i) => {
-                  const angle = (i * 9 + 90) * (Math.PI / 180); // Offset by 90 degrees
-                  const radius = 100 + (audioLevels[i % 32] || 0) * 0.3;
-                  const x = Math.cos(angle) * radius;
-                  const y = Math.sin(angle) * radius;
-                  const size = 1.5 + (frequencyData[i % 24] || 0) * 0.08;
-                  const opacity = isRecording ? 0.4 + (audioLevels[i % 32] || 0) * 0.008 : 0.2;
-                  
-                  return (
-                    <div
-                      key={i}
-                      className="absolute bg-primary/70 rounded-full transition-all duration-250 ease-out"
-                      style={{
-                        left: `calc(50% + ${x}px)`,
-                        top: `calc(50% + ${y}px)`,
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        opacity: opacity,
-                        transform: isRecording 
-                          ? `scale(${1 + (audioLevels[i % 32] || 0) * 0.015}) rotate(${-Date.now() * 0.03 + i * 9}deg)`
-                          : `scale(1) rotate(${-Date.now() * 0.015 + i * 9}deg)`
-                      }}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Inner Pulse Ring */}
+              {/* Outer Glowing Rings */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div
-                  className="absolute rounded-full border-2 border-primary/30 transition-all duration-300"
+                  className={`absolute rounded-full border-2 border-primary/20 transition-all duration-500 ${
+                    isRecording ? "animate-pulse" : ""
+                  }`}
                   style={{
-                    width: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
-                    height: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
-                    opacity: isRecording ? 0.6 : 0.3
+                    width: `${280 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 3}px`,
+                    height: `${280 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 3}px`,
+                    opacity: isRecording ? 0.6 : 0.3,
+                    boxShadow: isRecording 
+                      ? `0 0 ${40 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px rgba(120, 252, 214, 0.3)`
+                      : '0 0 20px rgba(120, 252, 214, 0.1)'
                   }}
                 />
                 <div
-                  className="absolute rounded-full border border-primary/20 transition-all duration-400"
+                  className={`absolute rounded-full border border-primary/15 transition-all duration-700 ${
+                    isRecording ? "animate-ping" : ""
+                  }`}
                   style={{
-                    width: `${160 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
-                    height: `${160 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
-                    opacity: isRecording ? 0.4 : 0.2
+                    width: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
+                    height: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
+                    opacity: isRecording ? 0.4 : 0.2,
+                    animationDuration: '2s'
                   }}
                 />
+                <div
+                  className={`absolute rounded-full border border-primary/10 transition-all duration-1000 ${
+                    isRecording ? "animate-ping" : ""
+                  }`}
+                  style={{
+                    width: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
+                    height: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
+                    opacity: isRecording ? 0.3 : 0.15,
+                    animationDuration: '3s'
+                  }}
+                />
+              </div>
+
+              {/* Audio Level Visualization Bars */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {Array.from({ length: 12 }, (_, i) => {
+                  const angle = (i * 30) * (Math.PI / 180);
+                  const distance = 100;
+                  const x = Math.cos(angle) * distance;
+                  const y = Math.sin(angle) * distance;
+                  const level = audioLevels[i * 2] || 0;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="absolute bg-gradient-to-t from-primary/40 to-primary/80 rounded-full transition-all duration-200"
+                      style={{
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
+                        width: '4px',
+                        height: `${Math.max(12, level * 0.6)}px`,
+                        opacity: isRecording ? 0.8 : 0.4,
+                        transform: `rotate(${(i * 30)}deg)`,
+                        transformOrigin: 'center bottom',
+                        boxShadow: isRecording 
+                          ? `0 0 ${8 + level * 0.2}px rgba(120, 252, 214, 0.6)`
+                          : 'none'
+                      }}
+                    />
+                  );
+                })}
               </div>
 
               {/* Central Microphone Container */}
               <div className="relative z-10 flex items-center justify-center">
                 <div 
-                  className="relative rounded-full bg-background/30 backdrop-blur-sm border border-primary/40 flex items-center justify-center transition-all duration-300"
+                  className={`relative rounded-full bg-background/30 backdrop-blur-sm border border-primary/40 flex items-center justify-center transition-all duration-300 ${
+                    isRecording ? "animate-pulse" : ""
+                  }`}
                   style={{
-                    width: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px`,
-                    height: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px`,
+                    width: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.8}px`,
+                    height: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.8}px`,
                     boxShadow: isRecording 
-                      ? `0 0 ${20 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.3}px rgba(120, 252, 214, 0.3)`
-                      : '0 0 10px rgba(120, 252, 214, 0.1)'
+                      ? `0 0 ${30 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px rgba(120, 252, 214, 0.4), inset 0 0 20px rgba(120, 252, 214, 0.1)`
+                      : '0 0 15px rgba(120, 252, 214, 0.2), inset 0 0 10px rgba(120, 252, 214, 0.05)',
+                    animationDuration: '1.5s'
                   }}
                 >
+                  {/* Inner Glow Ring */}
+                  <div 
+                    className="absolute inset-2 rounded-full border border-primary/20 transition-all duration-500"
+                    style={{
+                      opacity: isRecording ? 0.6 : 0.3,
+                      boxShadow: 'inset 0 0 15px rgba(120, 252, 214, 0.2)'
+                    }}
+                  />
+
                   {/* Microphone Icon */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 -960 960 960"
-                    className={`transition-all duration-300 ${
+                    className={`transition-all duration-300 relative z-10 ${
                       isRecording 
                         ? "fill-primary" 
                         : "fill-primary/80"
@@ -674,11 +676,11 @@ const LiveAudio: React.FC = () => {
                     height="64"
                     style={{
                       transform: isRecording 
-                        ? `scale(${1.1 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.005})`
+                        ? `scale(${1.15 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.01})`
                         : 'scale(1)',
                       filter: isRecording 
-                        ? `drop-shadow(0 0 ${8 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.1}px rgba(120, 252, 214, 0.6))`
-                        : 'none'
+                        ? `drop-shadow(0 0 ${12 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.2}px rgba(120, 252, 214, 0.8))`
+                        : 'drop-shadow(0 0 5px rgba(120, 252, 214, 0.3))'
                     }}
                     aria-hidden="true"
                   >
@@ -687,59 +689,33 @@ const LiveAudio: React.FC = () => {
 
                   {/* Mic Activity Indicator */}
                   {isRecording && (
-                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse">
+                    <div className="absolute -top-3 -right-3 w-5 h-5 bg-red-500 rounded-full animate-pulse">
                       <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75" />
+                      <div className="absolute inset-1 bg-red-400 rounded-full" />
                     </div>
                   )}
                 </div>
-
-                {/* Audio Level Bars around Mic */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {Array.from({ length: 8 }, (_, i) => {
-                    const angle = (i * 45) * (Math.PI / 180);
-                    const distance = 80;
-                    const x = Math.cos(angle) * distance;
-                    const y = Math.sin(angle) * distance;
-                    const level = audioLevels[i * 4] || 0;
-                    
-                    return (
-                      <div
-                        key={i}
-                        className="absolute bg-primary/60 rounded-full transition-all duration-150"
-                        style={{
-                          left: `calc(50% + ${x}px)`,
-                          top: `calc(50% + ${y}px)`,
-                          width: '3px',
-                          height: `${Math.max(8, level * 0.4)}px`,
-                          opacity: isRecording ? 0.8 : 0.3,
-                          transform: `rotate(${(i * 45)}deg)`,
-                          transformOrigin: 'center bottom'
-                        }}
-                      />
-                    );
-                  })}
-                </div>
               </div>
 
-              {/* Floating Text Particles for Volume Level */}
+              {/* Volume Level Indicator */}
               {isRecording && (
-                <div className="absolute top-4 left-4 px-3 py-1.5 bg-primary/20 rounded-full border border-primary/30 backdrop-blur-sm">
+                <div className="absolute top-6 left-6 px-4 py-2 bg-primary/15 rounded-full border border-primary/30 backdrop-blur-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span className="text-xs font-medium text-primary">
+                    <span className="text-sm font-medium text-primary">
                       {Math.round(audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length)}%
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Outer Glow Effect */}
+              {/* Ambient Glow Effect */}
               <div 
-                className="absolute inset-0 rounded-full transition-all duration-500"
+                className="absolute inset-0 rounded-full transition-all duration-1000 pointer-events-none"
                 style={{
                   background: isRecording 
-                    ? `radial-gradient(circle, transparent 60%, rgba(120, 252, 214, ${0.1 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.002}) 100%)`
-                    : 'radial-gradient(circle, transparent 60%, rgba(120, 252, 214, 0.05) 100%)'
+                    ? `radial-gradient(circle, transparent 50%, rgba(120, 252, 214, ${0.15 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.003}) 80%, transparent 100%)`
+                    : 'radial-gradient(circle, transparent 50%, rgba(120, 252, 214, 0.08) 80%, transparent 100%)'
                 }}
               />
             </div>
