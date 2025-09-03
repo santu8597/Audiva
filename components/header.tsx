@@ -11,7 +11,9 @@ export function Header() {
   const navItems = [
     { name: "Features", href: "#features-section" },
     { name: "Pricing", href: "#pricing-section" },
-    { name: "Testimonials", href: "#testimonials-section" }, // Changed from Docs to Testimonials
+    { name: "Testimonials", href: "#testimonials-section" },
+    { name: "Audio-agent", href: "/audio" },
+     // Changed from Docs to Testimonials
   ]
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

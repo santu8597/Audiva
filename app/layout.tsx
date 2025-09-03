@@ -31,7 +31,7 @@ html {
       </head>
       <body>
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-        <Analytics />
+        {/* <Analytics /> */}
       </body>
     </html>
   )
