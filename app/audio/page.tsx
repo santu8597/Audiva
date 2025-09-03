@@ -1,10 +1,229 @@
 "use client"
 
 /* eslint-disable react-hooks/exhaustive-deps */
-import { GoogleGenAI, type LiveServerMessage, Modality, type Session } from "@google/genai"
+import { GoogleGenAI, type LiveServerMessage, Modality, type Session, Behavior, Type } from "@google/genai"
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { createBlob, decode, decodeAudioData } from "@/lib/utils2"
+
+// Weather tool definitions
+const get_current_weather = {
+  name: "get_current_weather",
+  description: "Get the current weather for a specific location",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      location: {
+        type: Type.STRING,
+        description: "The city and state or country, e.g. 'San Francisco, CA' or 'London, UK'"
+      },
+      unit: {
+        type: Type.STRING,
+        enum: ["celsius", "fahrenheit"],
+        description: "The unit for temperature"
+      }
+    },
+    required: ["location"]
+  },
+  behavior: Behavior.NON_BLOCKING // Weather fetch can be non-blocking
+}
+
+const get_weather_forecast = {
+  name: "get_weather_forecast", 
+  description: "Get a 5-day weather forecast for a specific location",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      location: {
+        type: Type.STRING,
+        description: "The city and state or country, e.g. 'San Francisco, CA' or 'London, UK'"
+      },
+      days: {
+        type: Type.NUMBER,
+        description: "Number of days for forecast (1-5)",
+        minimum: 1,
+        maximum: 5
+      },
+      unit: {
+        type: Type.STRING,
+        enum: ["celsius", "fahrenheit"],
+        description: "The unit for temperature"
+      }
+    },
+    required: ["location"]
+  }
+  // Default behavior is blocking for forecast (more complex data)
+}
+
+// Console tool definition
+const console_log_name = {
+  name: "console_log_name",
+  description: "Log a name to the console for debugging or demonstration purposes",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      name: {
+        type: Type.STRING,
+        description: "The name to log to the console"
+      }
+    },
+    required: ["name"]
+  },
+  behavior: Behavior.NON_BLOCKING // Simple console logging is non-blocking
+}
+
+// Tool configuration - combine weather and console tools
+const allTools = [{ 
+  functionDeclarations: [get_current_weather, get_weather_forecast, console_log_name] 
+}]
+
+// Weather API functions
+// To use real weather data, get a free API key from https://openweathermap.org/api
+// and replace "your_openweather_api_key" below with your actual API key
+async function fetchCurrentWeather(location: string, unit: string = "celsius"): Promise<any> {
+  try {
+    // Using OpenWeatherMap API (you'll need to get a free API key)
+    const API_KEY = "your_openweather_api_key" // Replace with your API key from https://openweathermap.org/api
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=${unit === 'fahrenheit' ? 'imperial' : 'metric'}`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    return {
+      location: `${data.name}, ${data.sys.country}`,
+      temperature: Math.round(data.main.temp),
+      description: data.weather[0].description,
+      humidity: data.main.humidity,
+      windSpeed: data.wind.speed,
+      unit: unit === 'fahrenheit' ? '°F' : '°C'
+    }
+  } catch (error) {
+    console.error('Weather fetch error:', error)
+    // Fallback to mock data for demo
+    return {
+      location: location,
+      temperature: unit === 'fahrenheit' ? 72 : 22,
+      description: "partly cloudy",
+      humidity: 65,
+      windSpeed: 10,
+      unit: unit === 'fahrenheit' ? '°F' : '°C',
+      note: "Demo data - please add your OpenWeatherMap API key"
+    }
+  }
+}
+
+async function fetchWeatherForecast(location: string, days: number = 5, unit: string = "celsius"): Promise<any> {
+  try {
+    const API_KEY = "your_openweather_api_key" // Replace with your API key
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=${unit === 'fahrenheit' ? 'imperial' : 'metric'}&cnt=${days * 8}` // 8 forecasts per day (3-hour intervals)
+    )
+    
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    // Group forecasts by day
+    const dailyForecasts = []
+    for (let i = 0; i < Math.min(days, 5); i++) {
+      const dayData = data.list[i * 8] || data.list[0] // Get one forecast per day
+      dailyForecasts.push({
+        date: new Date(dayData.dt * 1000).toDateString(),
+        temperature: {
+          high: Math.round(dayData.main.temp_max),
+          low: Math.round(dayData.main.temp_min)
+        },
+        description: dayData.weather[0].description,
+        humidity: dayData.main.humidity
+      })
+    }
+    
+    return {
+      location: `${data.city.name}, ${data.city.country}`,
+      forecasts: dailyForecasts,
+      unit: unit === 'fahrenheit' ? '°F' : '°C'
+    }
+  } catch (error) {
+    console.error('Weather forecast error:', error)
+    // Fallback to mock data for demo
+    const mockForecasts = []
+    for (let i = 0; i < days; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() + i)
+      mockForecasts.push({
+        date: date.toDateString(),
+        temperature: {
+          high: unit === 'fahrenheit' ? 75 + i : 24 + i,
+          low: unit === 'fahrenheit' ? 60 + i : 15 + i
+        },
+        description: ["sunny", "partly cloudy", "cloudy", "light rain", "sunny"][i % 5],
+        humidity: 60 + (i * 5)
+      })
+    }
+    
+    return {
+      location: location,
+      forecasts: mockForecasts,
+      unit: unit === 'fahrenheit' ? '°F' : '°C',
+      note: "Demo data - please add your OpenWeatherMap API key"
+    }
+  }
+}
+
+// Console logging function
+async function logNameToConsole(name: string): Promise<any> {
+  console.log(`🎯 Console Tool: Name logged - "${name}"`)
+  return {
+    status: "success",
+    message: `Successfully logged name: ${name}`,
+    timestamp: new Date().toISOString()
+  }
+}
+
+// Tool response handler - updated to handle all tools
+async function handleToolCall(toolCall: any): Promise<any[]> {
+  const functionResponses = []
+  
+  for (const fc of toolCall.functionCalls) {
+    let result
+    
+    try {
+      if (fc.name === "get_current_weather") {
+        const { location, unit = "celsius" } = fc.args
+        result = await fetchCurrentWeather(location, unit)
+      } else if (fc.name === "get_weather_forecast") {
+        const { location, days = 5, unit = "celsius" } = fc.args
+        result = await fetchWeatherForecast(location, days, unit)
+      } else if (fc.name === "console_log_name") {
+        const { name } = fc.args
+        result = await logNameToConsole(name)
+      } else {
+        result = { error: `Unknown function: ${fc.name}` }
+      }
+      
+      functionResponses.push({
+        id: fc.id,
+        name: fc.name,
+        response: { result: result }
+      })
+    } catch (error: any) {
+      functionResponses.push({
+        id: fc.id,
+        name: fc.name,
+        response: { error: `Failed to execute ${fc.name}: ${error?.message || error}` }
+      })
+    }
+  }
+  
+  return functionResponses
+}
 
 const LiveAudio: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false)
@@ -64,6 +283,14 @@ const LiveAudio: React.FC = () => {
     {
       name: "Motivational Coach",
       prompt: "You are an enthusiastic motivational coach. Be encouraging, positive, and help users achieve their goals with energy and inspiration."
+    },
+    {
+      name: "Weather Assistant",
+      prompt: "You are a helpful weather assistant. You can provide current weather conditions and forecasts for any location worldwide. Ask users about their location and what weather information they need. Be informative and conversational about weather patterns."
+    },
+    {
+      name: "Developer Assistant",
+      prompt: "You are a developer assistant with access to debugging tools. You can help with development tasks and use the console logging tool to demonstrate functionality. When users want to test the console tool, ask for a name to log and use the console_log_name function."
     }
   ]
 
@@ -141,7 +368,8 @@ const LiveAudio: React.FC = () => {
             setIsSessionReady(true)
           },
           onmessage: async (message: LiveServerMessage) => {
-            const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData
+            // Handle audio response
+            const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData
 
             if (audio) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputAudioContext.currentTime)
@@ -157,6 +385,23 @@ const LiveAudio: React.FC = () => {
               source.start(nextStartTimeRef.current)
               nextStartTimeRef.current = nextStartTimeRef.current + audioBuffer.duration
               sourcesRef.current.add(source)
+            }
+
+            // Handle tool calls
+            const toolCall = message.toolCall
+            if (toolCall && toolCall.functionCalls && toolCall.functionCalls.length > 0) {
+              console.log('Tool call received:', toolCall)
+              setStatus("Processing tool request...")
+              
+              try {
+                const functionResponses = await handleToolCall(toolCall)
+                console.log('Sending tool response:', functionResponses)
+                sessionRef.current?.sendToolResponse({ functionResponses })
+                setStatus("Tool request processed")
+              } catch (error: any) {
+                console.error('Tool response error:', error)
+                setError(`Tool error: ${error?.message || error}`)
+              }
             }
 
             const interrupted = message.serverContent?.interrupted
@@ -182,8 +427,9 @@ const LiveAudio: React.FC = () => {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: selectedVoice } },
           },
           systemInstruction: {
-            parts: [{ text: systemPrompt }],
+            parts: [{ text: systemPrompt + "\n\nYou have access to several tools:\n1. Weather tools - get current weather and forecasts for any location\n2. Console tool - log names to the console for debugging\n\nWhen users ask about weather, use the appropriate weather functions. When they want to log something to console, use the console_log_name function." }],
           },
+          tools: allTools,
         },
       })
       sessionRef.current = session
