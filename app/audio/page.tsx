@@ -6,53 +6,67 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { createBlob, decode, decodeAudioData } from "@/lib/utils2"
 
-// Weather tool definitions
-const get_current_weather = {
-  name: "get_current_weather",
-  description: "Get the current weather for a specific location",
+// Weather API types
+interface GeocodingResponse {
+  results?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+  }>;
+}
+
+interface WeatherResponse {
+  current: {
+    temperature_2m: number;
+    apparent_temperature: number;
+    relative_humidity_2m: number;
+    wind_speed_10m: number;
+    wind_gusts_10m: number;
+    weather_code: number;
+  };
+}
+
+// Weather condition mapping
+function getWeatherCondition(code: number): string {
+  const conditions: { [key: number]: string } = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Slight rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Slight snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    80: "Slight rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    95: "Thunderstorm",
+  };
+  return conditions[code] || "Unknown";
+}
+
+// Single weather tool definition
+const get_weather = {
+  name: "get_weather",
+  description: "Get current weather conditions for any location worldwide",
   parameters: {
     type: Type.OBJECT,
     properties: {
       location: {
         type: Type.STRING,
-        description: "The city and state or country, e.g. 'San Francisco, CA' or 'London, UK'"
-      },
-      unit: {
-        type: Type.STRING,
-        enum: ["celsius", "fahrenheit"],
-        description: "The unit for temperature"
+        description: "The city name, e.g. 'New York', 'London', 'Tokyo'"
       }
     },
     required: ["location"]
   },
-  behavior: Behavior.NON_BLOCKING // Weather fetch can be non-blocking
-}
-
-const get_weather_forecast = {
-  name: "get_weather_forecast", 
-  description: "Get a 5-day weather forecast for a specific location",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      location: {
-        type: Type.STRING,
-        description: "The city and state or country, e.g. 'San Francisco, CA' or 'London, UK'"
-      },
-      days: {
-        type: Type.NUMBER,
-        description: "Number of days for forecast (1-5)",
-        minimum: 1,
-        maximum: 5
-      },
-      unit: {
-        type: Type.STRING,
-        enum: ["celsius", "fahrenheit"],
-        description: "The unit for temperature"
-      }
-    },
-    required: ["location"]
-  }
-  // Default behavior is blocking for forecast (more complex data)
+  behavior: Behavior.NON_BLOCKING
 }
 
 // Console tool definition
@@ -74,106 +88,40 @@ const console_log_name = {
 
 // Tool configuration - combine weather and console tools
 const allTools = [{ 
-  functionDeclarations: [get_current_weather, get_weather_forecast, console_log_name] 
+  functionDeclarations: [get_weather, console_log_name] 
 }]
 
-// Weather API functions
-// To use real weather data, get a free API key from https://openweathermap.org/api
-// and replace "your_openweather_api_key" below with your actual API key
-async function fetchCurrentWeather(location: string, unit: string = "celsius"): Promise<any> {
+// Weather fetch function using Open-Meteo API (free, no API key required)
+async function fetchWeather(location: string): Promise<any> {
   try {
-    // Using OpenWeatherMap API (you'll need to get a free API key)
-    const API_KEY = "your_openweather_api_key" // Replace with your API key from https://openweathermap.org/api
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=${unit === 'fahrenheit' ? 'imperial' : 'metric'}`
-    )
-    
-    if (!response.ok) {
-      throw new Error(`Weather API error: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    
-    return {
-      location: `${data.name}, ${data.sys.country}`,
-      temperature: Math.round(data.main.temp),
-      description: data.weather[0].description,
-      humidity: data.main.humidity,
-      windSpeed: data.wind.speed,
-      unit: unit === 'fahrenheit' ? '°F' : '°C'
-    }
-  } catch (error) {
-    console.error('Weather fetch error:', error)
-    // Fallback to mock data for demo
-    return {
-      location: location,
-      temperature: unit === 'fahrenheit' ? 72 : 22,
-      description: "partly cloudy",
-      humidity: 65,
-      windSpeed: 10,
-      unit: unit === 'fahrenheit' ? '°F' : '°C',
-      note: "Demo data - please add your OpenWeatherMap API key"
-    }
-  }
-}
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`;
+    const geocodingResponse = await fetch(geocodingUrl);
+    const geocodingData = (await geocodingResponse.json()) as GeocodingResponse;
 
-async function fetchWeatherForecast(location: string, days: number = 5, unit: string = "celsius"): Promise<any> {
-  try {
-    const API_KEY = "your_openweather_api_key" // Replace with your API key
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=${unit === 'fahrenheit' ? 'imperial' : 'metric'}&cnt=${days * 8}` // 8 forecasts per day (3-hour intervals)
-    )
-    
-    if (!response.ok) {
-      throw new Error(`Weather API error: ${response.status}`)
+    if (!geocodingData.results?.[0]) {
+      throw new Error(`Location '${location}' not found`);
     }
-    
-    const data = await response.json()
-    
-    // Group forecasts by day
-    const dailyForecasts = []
-    for (let i = 0; i < Math.min(days, 5); i++) {
-      const dayData = data.list[i * 8] || data.list[0] // Get one forecast per day
-      dailyForecasts.push({
-        date: new Date(dayData.dt * 1000).toDateString(),
-        temperature: {
-          high: Math.round(dayData.main.temp_max),
-          low: Math.round(dayData.main.temp_min)
-        },
-        description: dayData.weather[0].description,
-        humidity: dayData.main.humidity
-      })
-    }
+
+    const { latitude, longitude, name } = geocodingData.results[0];
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code`;
+
+    const response = await fetch(weatherUrl);
+    const data = (await response.json()) as WeatherResponse;
+    console.log(data);
     
     return {
-      location: `${data.city.name}, ${data.city.country}`,
-      forecasts: dailyForecasts,
-      unit: unit === 'fahrenheit' ? '°F' : '°C'
-    }
+      temperature: data.current.temperature_2m,
+      feelsLike: data.current.apparent_temperature,
+      humidity: data.current.relative_humidity_2m,
+      windSpeed: data.current.wind_speed_10m,
+      windGust: data.current.wind_gusts_10m,
+      conditions: getWeatherCondition(data.current.weather_code),
+      location: name,
+      unit: "°C"
+    };
   } catch (error) {
-    console.error('Weather forecast error:', error)
-    // Fallback to mock data for demo
-    const mockForecasts = []
-    for (let i = 0; i < days; i++) {
-      const date = new Date()
-      date.setDate(date.getDate() + i)
-      mockForecasts.push({
-        date: date.toDateString(),
-        temperature: {
-          high: unit === 'fahrenheit' ? 75 + i : 24 + i,
-          low: unit === 'fahrenheit' ? 60 + i : 15 + i
-        },
-        description: ["sunny", "partly cloudy", "cloudy", "light rain", "sunny"][i % 5],
-        humidity: 60 + (i * 5)
-      })
-    }
-    
-    return {
-      location: location,
-      forecasts: mockForecasts,
-      unit: unit === 'fahrenheit' ? '°F' : '°C',
-      note: "Demo data - please add your OpenWeatherMap API key"
-    }
+    console.error('Weather fetch error:', error);
+    throw error;
   }
 }
 
@@ -195,12 +143,9 @@ async function handleToolCall(toolCall: any): Promise<any[]> {
     let result
     
     try {
-      if (fc.name === "get_current_weather") {
-        const { location, unit = "celsius" } = fc.args
-        result = await fetchCurrentWeather(location, unit)
-      } else if (fc.name === "get_weather_forecast") {
-        const { location, days = 5, unit = "celsius" } = fc.args
-        result = await fetchWeatherForecast(location, days, unit)
+      if (fc.name === "get_weather") {
+        const { location } = fc.args
+        result = await fetchWeather(location)
       } else if (fc.name === "console_log_name") {
         const { name } = fc.args
         result = await logNameToConsole(name)
@@ -286,7 +231,7 @@ const LiveAudio: React.FC = () => {
     },
     {
       name: "Weather Assistant",
-      prompt: "You are a helpful weather assistant. You can provide current weather conditions and forecasts for any location worldwide. Ask users about their location and what weather information they need. Be informative and conversational about weather patterns."
+      prompt: "You are a helpful weather assistant with access to real-time weather data. You can get current weather conditions for any location worldwide including temperature, humidity, wind speed, and weather conditions. Ask users about their location and provide detailed weather information using the get_weather tool."
     },
     {
       name: "Developer Assistant",
@@ -427,7 +372,7 @@ const LiveAudio: React.FC = () => {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: selectedVoice } },
           },
           systemInstruction: {
-            parts: [{ text: systemPrompt + "\n\nYou have access to several tools:\n1. Weather tools - get current weather and forecasts for any location\n2. Console tool - log names to the console for debugging\n\nWhen users ask about weather, use the appropriate weather functions. When they want to log something to console, use the console_log_name function." }],
+            parts: [{ text: systemPrompt + "\n\nYou have access to these tools:\n1. get_weather - Get current weather conditions for any location worldwide using real-time data\n2. console_log_name - Log names to the console for debugging\n\nWhen users ask about weather, use the get_weather function. When they want to test console logging, use the console_log_name function." }],
           },
           tools: allTools,
         },
