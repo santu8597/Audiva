@@ -21,6 +21,7 @@ const LiveAudio: React.FC = () => {
   const [isEditingPrompt, setIsEditingPrompt] = useState(false)
   const [tempPrompt, setTempPrompt] = useState("You are a helpful AI assistant.")
   const [selectedVoice, setSelectedVoice] = useState("Orus")
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   
   // Tools results state
   const [toolResults, setToolResults] = useState<Array<{
@@ -345,12 +346,20 @@ const LiveAudio: React.FC = () => {
   const handlePresetSelect = (preset: typeof presetPrompts[0]) => {
     updateSystemPrompt(preset.prompt)
     setIsEditingPrompt(false)
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false)
+    }
   }
 
   const handleCustomPromptSave = () => {
     if (tempPrompt.trim()) {
       updateSystemPrompt(tempPrompt.trim())
       setIsEditingPrompt(false)
+      // Close sidebar on mobile after selection
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false)
+      }
     }
   }
 
@@ -361,6 +370,10 @@ const LiveAudio: React.FC = () => {
 
   const handleVoiceChange = (voice: string) => {
     setSelectedVoice(voice)
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false)
+    }
     // Reset session with new voice
     if (sessionRef.current) {
       sessionRef.current.close()
@@ -464,14 +477,80 @@ const LiveAudio: React.FC = () => {
     }
   }, [isRecording, isSessionReady])
 
+  // Handle window resize to auto-close sidebar on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isSidebarOpen) {
+        setIsSidebarOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isSidebarOpen])
+
   return (
     <div className="h-screen bg-background text-foreground flex overflow-hidden">
+      {/* Mobile Hamburger Menu */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden bg-card/20 backdrop-blur-sm border border-border rounded-lg p-2 hover:bg-card/30 transition-colors"
+        aria-label="Toggle sidebar"
+      >
+        <svg
+          className="w-6 h-6 text-foreground"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          {isSidebarOpen ? (
+            <path d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-80 bg-card/20 backdrop-blur-sm border-r border-border flex flex-col">
+      <div className={`w-80 bg-card/20 backdrop-blur-sm border-r border-border flex flex-col transition-transform duration-300 ease-in-out z-40 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 md:relative fixed inset-y-0 left-0`}>
         {/* Sidebar Header - Fixed */}
         <div className="p-6 border-b border-border">
-          <h1 className="text-2xl font-bold text-foreground">AI Voice Agent</h1>
-          <p className="text-muted-foreground text-sm mt-1">Configure your AI assistant</p>
+          {/* Close button for mobile */}
+          <div className="flex items-center justify-between mb-2 md:mb-0">
+            <div>
+              <p className="text-muted-foreground text-sm">Configure Audiva</p>
+            </div>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden p-1 rounded-lg hover:bg-card/30 transition-colors"
+              aria-label="Close sidebar"
+            >
+              <svg
+                className="w-5 h-5 text-muted-foreground"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Sidebar Content - Scrollable */}
@@ -660,18 +739,18 @@ const LiveAudio: React.FC = () => {
       {/* Main Content Area - Fixed */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Content Area - Centered */}
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 pt-16 md:pt-4">
           <div className="bg-card/20 backdrop-blur-sm rounded-3xl p-4 md:p-6 border border-border shadow-sm max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
           {/* Status Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div
                 className={`relative w-3.5 h-3.5 rounded-full ${isSessionReady ? "bg-primary" : "bg-red-500"}`}
-                aria-label={isSessionReady ? "AI Ready" : "Connecting"}
+                aria-label={isSessionReady ? "Audiva is Ready" : "Connecting to Audiva"}
               >
                 {isSessionReady && <span className="absolute inset-0 rounded-full bg-primary/60 animate-ping" />}
               </div>
-              <span className="font-semibold text-foreground">{isSessionReady ? "AI Ready" : "Connecting..."}</span>
+              <span className="font-semibold text-foreground">{isSessionReady ? "Audiva is Ready" : "Connecting..."}</span>
             </div>
 
             <div
@@ -925,9 +1004,7 @@ const LiveAudio: React.FC = () => {
         </div>
 
         {/* Footer - Fixed at bottom */}
-        <div className="py-2 text-center text-muted-foreground/70 text-xs border-t border-border bg-background/50 backdrop-blur-sm">
-          <p className="font-medium">Powered by Gemini Live</p>
-        </div>
+        
       </div>
     </div>
   )
