@@ -22,6 +22,16 @@ const LiveAudio: React.FC = () => {
   const [tempPrompt, setTempPrompt] = useState("You are a helpful AI assistant.")
   const [selectedVoice, setSelectedVoice] = useState("Orus")
   
+  // Tools results state
+  const [toolResults, setToolResults] = useState<Array<{
+    id: string
+    name: string
+    timestamp: string
+    input: any
+    result: any
+    error?: string
+  }>>([])
+  
   // Audio visualization state
   const [audioLevels, setAudioLevels] = useState<number[]>(Array(32).fill(0))
   const [frequencyData, setFrequencyData] = useState<number[]>(Array(24).fill(0))
@@ -183,6 +193,19 @@ const LiveAudio: React.FC = () => {
               try {
                 const functionResponses = await handleToolCall(toolCall)
                 console.log('Sending tool response:', functionResponses)
+                
+                // Store tool results in state for UI display
+                const newToolResults = toolCall.functionCalls.map((fc: any, index: number) => ({
+                  id: fc.id || `tool-${Date.now()}-${index}`,
+                  name: fc.name,
+                  timestamp: new Date().toLocaleString(),
+                  input: fc.args,
+                  result: functionResponses[index]?.response?.result || null,
+                  error: functionResponses[index]?.response?.error || null
+                }))
+                
+                setToolResults(prev => [...newToolResults, ...prev].slice(0, 10)) // Keep last 10 results
+                
                 sessionRef.current?.sendToolResponse({ functionResponses })
                 setStatus("Tool request processed")
               } catch (error: any) {
@@ -345,6 +368,11 @@ const LiveAudio: React.FC = () => {
       setStatus("Updating voice...")
       setTimeout(() => initSession(), 500)
     }
+  }
+
+  // Clear tool results
+  const clearToolResults = () => {
+    setToolResults([])
   }
 
   const reset = () => {
@@ -542,6 +570,88 @@ const LiveAudio: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Tools Results Section */}
+        {toolResults.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Tools Results</h2>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1.5 text-sm bg-muted/30 text-muted-foreground rounded-lg border border-border">
+                  {toolResults.length} results
+                </div>
+                <button
+                  onClick={clearToolResults}
+                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg hover:border-primary/20"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {toolResults.map((result) => (
+                <div
+                  key={result.id}
+                  className="bg-card/30 rounded-lg border border-border p-4 space-y-3"
+                >
+                  {/* Tool Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${result.error ? 'bg-red-500' : 'bg-green-500'}`} />
+                        <span className="font-medium text-foreground">{result.name}</span>
+                      </div>
+                      {result.error && (
+                        <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded border border-red-500/30">
+                          Error
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">{result.timestamp}</span>
+                  </div>
+
+                  {/* Input Parameters */}
+                  {result.input && Object.keys(result.input).length > 0 && (
+                    <div>
+                      <div className="text-xs font-medium text-muted-foreground mb-1">Input:</div>
+                      <div className="bg-muted/50 rounded p-2 text-sm font-mono">
+                        {Object.entries(result.input).map(([key, value]) => (
+                          <div key={key} className="text-muted-foreground">
+                            <span className="text-foreground">{key}:</span> {JSON.stringify(value)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Result or Error */}
+                  <div>
+                    <div className="text-xs font-medium text-muted-foreground mb-1">
+                      {result.error ? 'Error:' : 'Result:'}
+                    </div>
+                    <div className={`rounded p-2 text-sm ${
+                      result.error 
+                        ? 'bg-red-500/10 border border-red-500/20 text-red-400' 
+                        : 'bg-muted/50 text-muted-foreground'
+                    }`}>
+                      {result.error ? (
+                        <div className="font-mono">{result.error}</div>
+                      ) : (
+                        <div className="font-mono">
+                          {typeof result.result === 'object' 
+                            ? JSON.stringify(result.result, null, 2)
+                            : String(result.result)
+                          }
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Status Header */}
         <div className="flex items-center justify-between mb-8">
