@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import GlassmorphicNavbar from "../components/glassmorphic-navbar"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ html {
         `}</style>
       </head>
       <body>
+        <GlassmorphicNavbar />
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         {/* <Analytics /> */}
       </body>

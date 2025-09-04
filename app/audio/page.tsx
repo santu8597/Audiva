@@ -465,220 +465,229 @@ const LiveAudio: React.FC = () => {
   }, [isRecording, isSessionReady])
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-balance text-foreground tracking-tight">AI Voice Agent</h1>
-        <p className="text-muted-foreground text-base md:text-lg mt-2">Experience real-time, natural voice interaction</p>
-      </div>
+    <div className="h-screen bg-background text-foreground flex overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-80 bg-card/20 backdrop-blur-sm border-r border-border flex flex-col">
+        {/* Sidebar Header - Fixed */}
+        <div className="p-6 border-b border-border">
+          <h1 className="text-2xl font-bold text-foreground">AI Voice Agent</h1>
+          <p className="text-muted-foreground text-sm mt-1">Configure your AI assistant</p>
+        </div>
 
-      {/* Main Container */}
-      <div className="bg-card/20 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-border shadow-sm max-w-5xl w-full">
-        {/* System Prompt Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">AI Personality</h2>
-            <button
-              onClick={() => {
-                setTempPrompt(systemPrompt)
-                setIsEditingPrompt(!isEditingPrompt)
-              }}
-              className="px-3 py-1.5 text-sm bg-primary/10 hover:bg-primary/20 text-primary rounded-lg border border-primary/20 transition-colors"
-            >
-              {isEditingPrompt ? "Cancel" : "Customize"}
-            </button>
+        {/* Sidebar Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* System Prompt Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">AI Personality</h2>
+              <button
+                onClick={() => {
+                  setTempPrompt(systemPrompt)
+                  setIsEditingPrompt(!isEditingPrompt)
+                }}
+                className="px-3 py-1.5 text-sm bg-primary/10 hover:bg-primary/20 text-primary rounded-lg border border-primary/20 transition-colors"
+              >
+                {isEditingPrompt ? "Cancel" : "Customize"}
+              </button>
+            </div>
+
+            {!isEditingPrompt ? (
+              <div className="space-y-3">
+                {/* Current Prompt Display */}
+                <div className="p-3 bg-muted/30 rounded-lg border border-border">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{systemPrompt}</p>
+                </div>
+
+                {/* Preset Prompts */}
+                <div className="grid grid-cols-1 gap-2">
+                  {presetPrompts.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => handlePresetSelect(preset)}
+                      disabled={isRecording}
+                      className={`p-2.5 text-xs font-medium rounded-lg border transition-all text-left ${
+                        systemPrompt === preset.prompt
+                          ? "bg-primary/20 text-primary border-primary/30"
+                          : "bg-card/20 hover:bg-card/30 text-muted-foreground border-border hover:border-primary/20"
+                      } ${isRecording ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Custom Prompt Editor */}
+                <textarea
+                  value={tempPrompt}
+                  onChange={(e) => setTempPrompt(e.target.value)}
+                  placeholder="Enter your custom system prompt..."
+                  className="w-full h-24 p-3 text-sm bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                />
+                
+                {/* Editor Actions */}
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={handleCustomPromptCancel}
+                    className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCustomPromptSave}
+                    disabled={!tempPrompt.trim() || isRecording}
+                    className="px-4 py-1.5 text-sm bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg transition-colors disabled:cursor-not-allowed"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {!isEditingPrompt ? (
-            <div className="space-y-3">
-              {/* Current Prompt Display */}
-              <div className="p-3 bg-muted/30 rounded-lg border border-border">
-                <p className="text-sm text-muted-foreground leading-relaxed">{systemPrompt}</p>
-              </div>
-
-              {/* Preset Prompts */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {presetPrompts.map((preset) => (
-                  <button
-                    key={preset.name}
-                    onClick={() => handlePresetSelect(preset)}
-                    disabled={isRecording}
-                    className={`p-2.5 text-xs font-medium rounded-lg border transition-all text-left ${
-                      systemPrompt === preset.prompt
-                        ? "bg-primary/20 text-primary border-primary/30"
-                        : "bg-card/20 hover:bg-card/30 text-muted-foreground border-border hover:border-primary/20"
-                    } ${isRecording ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    {preset.name}
-                  </button>
-                ))}
+          {/* Voice Selection Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Voice Selection</h2>
+              <div className="px-3 py-1.5 text-sm bg-muted/30 text-muted-foreground rounded-lg border border-border">
+                {selectedVoice}
               </div>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Custom Prompt Editor */}
-              <textarea
-                value={tempPrompt}
-                onChange={(e) => setTempPrompt(e.target.value)}
-                placeholder="Enter your custom system prompt..."
-                className="w-full h-24 p-3 text-sm bg-background border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder:text-muted-foreground"
-              />
-              
-              {/* Editor Actions */}
-              <div className="flex justify-end gap-2">
+
+            <div className="grid grid-cols-2 gap-2">
+              {voiceOptions.map((voice) => (
                 <button
-                  onClick={handleCustomPromptCancel}
-                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  key={voice}
+                  onClick={() => handleVoiceChange(voice)}
+                  disabled={isRecording}
+                  className={`p-2.5 text-xs font-medium rounded-lg border transition-all ${
+                    selectedVoice === voice
+                      ? "bg-primary/20 text-primary border-primary/30"
+                      : "bg-card/20 hover:bg-card/30 text-muted-foreground border-border hover:border-primary/20"
+                  } ${isRecording ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  Cancel
+                  {voice}
                 </button>
-                <button
-                  onClick={handleCustomPromptSave}
-                  disabled={!tempPrompt.trim() || isRecording}
-                  className="px-4 py-1.5 text-sm bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg transition-colors disabled:cursor-not-allowed"
-                >
-                  Save
-                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tools Results Section */}
+          {toolResults.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Tools Results</h2>
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 text-sm bg-muted/30 text-muted-foreground rounded-lg border border-border">
+                    {toolResults.length}
+                  </div>
+                  <button
+                    onClick={clearToolResults}
+                    className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg hover:border-primary/20"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {toolResults.map((result) => (
+                  <div
+                    key={result.id}
+                    className="bg-card/30 rounded-lg border border-border p-4 space-y-3"
+                  >
+                    {/* Tool Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${result.error ? 'bg-red-500' : 'bg-green-500'}`} />
+                          <span className="font-medium text-foreground">{result.name}</span>
+                        </div>
+                        {result.error && (
+                          <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded border border-red-500/30">
+                            Error
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{result.timestamp}</span>
+                    </div>
+
+                    {/* Input Parameters */}
+                    {result.input && Object.keys(result.input).length > 0 && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Input:</div>
+                        <div className="bg-muted/50 rounded p-2 text-sm font-mono">
+                          {Object.entries(result.input).map(([key, value]) => (
+                            <div key={key} className="text-muted-foreground">
+                              <span className="text-foreground">{key}:</span> {JSON.stringify(value)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Result or Error */}
+                    <div>
+                      <div className="text-xs font-medium text-muted-foreground mb-1">
+                        {result.error ? 'Error:' : 'Result:'}
+                      </div>
+                      <div className={`rounded p-2 text-sm ${
+                        result.error 
+                          ? 'bg-red-500/10 border border-red-500/20 text-red-400' 
+                          : 'bg-muted/50 text-muted-foreground'
+                      }`}>
+                        {result.error ? (
+                          <div className="font-mono">{result.error}</div>
+                        ) : (
+                          <div className="font-mono">
+                            {typeof result.result === 'object' 
+                              ? JSON.stringify(result.result, null, 2)
+                              : String(result.result)
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Voice Selection Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Voice Selection</h2>
-            <div className="px-3 py-1.5 text-sm bg-muted/30 text-muted-foreground rounded-lg border border-border">
-              Current: {selectedVoice}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {voiceOptions.map((voice) => (
-              <button
-                key={voice}
-                onClick={() => handleVoiceChange(voice)}
-                disabled={isRecording}
-                className={`p-2.5 text-xs font-medium rounded-lg border transition-all ${
-                  selectedVoice === voice
-                    ? "bg-primary/20 text-primary border-primary/30"
-                    : "bg-card/20 hover:bg-card/30 text-muted-foreground border-border hover:border-primary/20"
-                } ${isRecording ? "opacity-50 cursor-not-allowed" : ""}`}
+      {/* Main Content Area - Fixed */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Content Area - Centered */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-card/20 backdrop-blur-sm rounded-3xl p-4 md:p-6 border border-border shadow-sm max-w-4xl w-full max-h-full overflow-hidden flex flex-col">
+          {/* Status Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div
+                className={`relative w-3.5 h-3.5 rounded-full ${isSessionReady ? "bg-primary" : "bg-red-500"}`}
+                aria-label={isSessionReady ? "AI Ready" : "Connecting"}
               >
-                {voice}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tools Results Section */}
-        {toolResults.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Tools Results</h2>
-              <div className="flex items-center gap-2">
-                <div className="px-3 py-1.5 text-sm bg-muted/30 text-muted-foreground rounded-lg border border-border">
-                  {toolResults.length} results
-                </div>
-                <button
-                  onClick={clearToolResults}
-                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg hover:border-primary/20"
-                >
-                  Clear
-                </button>
+                {isSessionReady && <span className="absolute inset-0 rounded-full bg-primary/60 animate-ping" />}
               </div>
+              <span className="font-semibold text-foreground">{isSessionReady ? "AI Ready" : "Connecting..."}</span>
             </div>
 
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {toolResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="bg-card/30 rounded-lg border border-border p-4 space-y-3"
-                >
-                  {/* Tool Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${result.error ? 'bg-red-500' : 'bg-green-500'}`} />
-                        <span className="font-medium text-foreground">{result.name}</span>
-                      </div>
-                      {result.error && (
-                        <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded border border-red-500/30">
-                          Error
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground">{result.timestamp}</span>
-                  </div>
-
-                  {/* Input Parameters */}
-                  {result.input && Object.keys(result.input).length > 0 && (
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Input:</div>
-                      <div className="bg-muted/50 rounded p-2 text-sm font-mono">
-                        {Object.entries(result.input).map(([key, value]) => (
-                          <div key={key} className="text-muted-foreground">
-                            <span className="text-foreground">{key}:</span> {JSON.stringify(value)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Result or Error */}
-                  <div>
-                    <div className="text-xs font-medium text-muted-foreground mb-1">
-                      {result.error ? 'Error:' : 'Result:'}
-                    </div>
-                    <div className={`rounded p-2 text-sm ${
-                      result.error 
-                        ? 'bg-red-500/10 border border-red-500/20 text-red-400' 
-                        : 'bg-muted/50 text-muted-foreground'
-                    }`}>
-                      {result.error ? (
-                        <div className="font-mono">{result.error}</div>
-                      ) : (
-                        <div className="font-mono">
-                          {typeof result.result === 'object' 
-                            ? JSON.stringify(result.result, null, 2)
-                            : String(result.result)
-                          }
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Status Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
             <div
-              className={`relative w-3.5 h-3.5 rounded-full ${isSessionReady ? "bg-primary" : "bg-red-500"}`}
-              aria-label={isSessionReady ? "AI Ready" : "Connecting"}
+              className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide border ${
+                isRecording ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-muted/30 text-muted-foreground border-border"
+              }`}
+              aria-live="polite"
             >
-              {isSessionReady && <span className="absolute inset-0 rounded-full bg-primary/60 animate-ping" />}
+              {isRecording ? "● LIVE" : "○ STANDBY"}
             </div>
-            <span className="font-semibold text-foreground">{isSessionReady ? "AI Ready" : "Connecting..."}</span>
           </div>
 
-          <div
-            className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide border ${
-              isRecording ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-muted/30 text-muted-foreground border-border"
-            }`}
-            aria-live="polite"
-          >
-            {isRecording ? "● LIVE" : "○ STANDBY"}
-          </div>
-        </div>
-
-        {/* Enhanced Audio Visualizer with Glowing Animations */}
-        {inputNode && outputNode && (
-          <div className="mb-8 flex items-center justify-center">
-            <div className="relative size-80 md:size-96 rounded-full bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center">
+          {/* Enhanced Audio Visualizer with Glowing Animations */}
+          {inputNode && outputNode && (
+          <div className="flex items-center justify-center flex-shrink-0">
+            <div className="relative size-64 md:size-72 rounded-full bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center">
               
               {/* Outer Glowing Rings */}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -687,8 +696,8 @@ const LiveAudio: React.FC = () => {
                     isRecording ? "animate-pulse" : ""
                   }`}
                   style={{
-                    width: `${280 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 3}px`,
-                    height: `${280 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 3}px`,
+                    width: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
+                    height: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
                     opacity: isRecording ? 0.6 : 0.3,
                     boxShadow: isRecording 
                       ? `0 0 ${40 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px rgba(120, 252, 214, 0.3)`
@@ -700,8 +709,8 @@ const LiveAudio: React.FC = () => {
                     isRecording ? "animate-ping" : ""
                   }`}
                   style={{
-                    width: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
-                    height: `${240 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 2}px`,
+                    width: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
+                    height: `${200 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 1.5}px`,
                     opacity: isRecording ? 0.4 : 0.2,
                     animationDuration: '2s'
                   }}
@@ -723,7 +732,7 @@ const LiveAudio: React.FC = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 {Array.from({ length: 12 }, (_, i) => {
                   const angle = (i * 30) * (Math.PI / 180);
-                  const distance = 100;
+                  const distance = 80;
                   const x = Math.cos(angle) * distance;
                   const y = Math.sin(angle) * distance;
                   const level = audioLevels[i * 2] || 0;
@@ -756,8 +765,8 @@ const LiveAudio: React.FC = () => {
                     isRecording ? "animate-pulse" : ""
                   }`}
                   style={{
-                    width: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.8}px`,
-                    height: `${120 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.8}px`,
+                    width: `${100 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.6}px`,
+                    height: `${100 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.6}px`,
                     boxShadow: isRecording 
                       ? `0 0 ${30 + (audioLevels.reduce((a, b) => a + b, 0) / audioLevels.length) * 0.5}px rgba(120, 252, 214, 0.4), inset 0 0 20px rgba(120, 252, 214, 0.1)`
                       : '0 0 15px rgba(120, 252, 214, 0.2), inset 0 0 10px rgba(120, 252, 214, 0.05)',
@@ -833,9 +842,9 @@ const LiveAudio: React.FC = () => {
         )}
 
         {/* Control Panel */}
-        <div className="space-y-8">
+        <div className="space-y-4 mt-4">
           {/* Main Control Buttons */}
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center justify-center gap-4">
             {/* Reset Button */}
             <div className="relative group">
               <button
@@ -880,9 +889,7 @@ const LiveAudio: React.FC = () => {
                   <path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
                 </svg>
               </button>
-              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-sm mb-4 font-medium text-muted-foreground">
-                {isRecording ? "Recording..." : "Start"}
-              </div>
+              
             </div>
 
             {/* Stop Button */}
@@ -911,14 +918,16 @@ const LiveAudio: React.FC = () => {
           {/* Instructions */}
           <div className="text-center space-y-1">
             <p className="text-muted-foreground">Click Start to begin voice interaction</p>
-            <p className="text-muted-foreground/70 text-sm">Speak naturally — AI will respond in real time</p>
+            
           </div>
         </div>
-      </div>
+        </div>
+        </div>
 
-      {/* Footer */}
-      <div className="mt-8 text-center text-muted-foreground/70 text-xs">
-        <p className="font-medium">Powered by Gemini Live</p>
+        {/* Footer - Fixed at bottom */}
+        <div className="py-2 text-center text-muted-foreground/70 text-xs border-t border-border bg-background/50 backdrop-blur-sm">
+          <p className="font-medium">Powered by Gemini Live</p>
+        </div>
       </div>
     </div>
   )
