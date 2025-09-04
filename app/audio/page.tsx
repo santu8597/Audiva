@@ -770,7 +770,7 @@ const LiveAudio: React.FC = () => {
                   <path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
                 </svg>
               </button>
-              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-sm font-medium text-muted-foreground">
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-sm mb-4 font-medium text-muted-foreground">
                 {isRecording ? "Recording..." : "Start"}
               </div>
             </div>
