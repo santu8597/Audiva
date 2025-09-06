@@ -6,7 +6,7 @@ export function SocialProof() {
       <div className="text-center text-gray-300 text-sm font-medium leading-tight">
         Trusted by forward-thinking businesses
       </div>
-      <div className="self-stretch grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
+      {/* <div className="self-stretch grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
         {Array.from({ length: 8 }).map((_, i) => (
           <Image
             key={i}
@@ -17,7 +17,7 @@ export function SocialProof() {
             className="w-full max-w-[400px] h-auto object-contain grayscale opacity-70"
           />
         ))}
-      </div>
+      </div> */}
     </section>
   )
 }
