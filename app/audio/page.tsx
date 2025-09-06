@@ -22,6 +22,8 @@ const LiveAudio: React.FC = () => {
   const [tempPrompt, setTempPrompt] = useState("You are a helpful AI assistant.")
   const [selectedVoice, setSelectedVoice] = useState("Orus")
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   
   // Tools results state
   const [toolResults, setToolResults] = useState<Array<{
@@ -61,34 +63,6 @@ const LiveAudio: React.FC = () => {
     {
       name: "Default Assistant",
       prompt: "You are a helpful AI assistant."
-    },
-    {
-      name: "Creative Writer",
-      prompt: "You are a creative writing assistant. Help users with storytelling, character development, and creative ideas. Be imaginative and inspiring."
-    },
-    {
-      name: "Technical Expert",
-      prompt: "You are a technical expert specializing in programming, engineering, and technology. Provide detailed, accurate technical explanations and solutions."
-    },
-    {
-      name: "Casual Friend",
-      prompt: "You are a friendly, casual conversation partner. Be warm, engaging, and speak in a relaxed, conversational tone like a good friend."
-    },
-    {
-      name: "Teacher",
-      prompt: "You are an educational tutor. Explain concepts clearly, ask questions to check understanding, and adapt your teaching style to help the user learn effectively."
-    },
-    {
-      name: "Motivational Coach",
-      prompt: "You are an enthusiastic motivational coach. Be encouraging, positive, and help users achieve their goals with energy and inspiration."
-    },
-    {
-      name: "Weather Assistant",
-      prompt: "You are a helpful weather assistant with access to real-time weather data. You can get current weather conditions for any location worldwide including temperature, humidity, wind speed, and weather conditions. Ask users about their location and provide detailed weather information using the get_weather tool."
-    },
-    {
-      name: "Developer Assistant",
-      prompt: "You are a developer assistant with access to debugging tools. You can help with development tasks and use the console logging tool to demonstrate functionality. When users want to test the console tool, ask for a name to log and use the console_log_name function."
     }
   ]
 
@@ -398,6 +372,76 @@ const LiveAudio: React.FC = () => {
     initSession()
   }
 
+  // PDF upload and prompt generation functions
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && file.type === "application/pdf") {
+      setUploadedFile(file)
+    } else {
+      setError("Please select a valid PDF file")
+    }
+  }
+
+  const generatePromptFromPDF = async () => {
+    if (!uploadedFile) {
+      setError("Please upload a PDF file first")
+      return
+    }
+
+    setIsGeneratingPrompt(true)
+    setError("")
+
+    try {
+      const formData = new FormData()
+      formData.append("file", uploadedFile)
+
+      const response = await fetch("/api/generate-prompt", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate prompt")
+      }
+
+      const data = await response.json()
+      
+      if (data.prompt) {
+        setTempPrompt(data.prompt)
+        setSystemPrompt(data.prompt)
+        updateSystemPrompt(data.prompt)
+        setUploadedFile(null)
+        // Reset file input
+        const fileInput = document.getElementById("pdf-upload") as HTMLInputElement
+        if (fileInput) fileInput.value = ""
+        
+        // Switch to editing mode to show the generated prompt
+        setIsEditingPrompt(true)
+        
+        setStatus("System prompt generated and updated successfully!")
+        // Close sidebar on mobile after generation
+        if (window.innerWidth < 768) {
+          setIsSidebarOpen(false)
+        }
+      }
+    } catch (err: any) {
+      console.error("Error generating prompt:", err)
+      setError(err.message || "Failed to generate prompt")
+    } finally {
+      setIsGeneratingPrompt(false)
+    }
+  }
+
+  const copyPromptToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(tempPrompt)
+      setStatus("Prompt copied to clipboard!")
+    } catch (err) {
+      setError("Failed to copy to clipboard")
+    }
+  }
+
   // Audio visualization animation
   useEffect(() => {
     const animate = () => {
@@ -577,6 +621,64 @@ const LiveAudio: React.FC = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed">{systemPrompt}</p>
                 </div>
 
+                {/* PDF Upload Section for Prompt Generation */}
+                <div className="p-4 bg-card/20 rounded-lg border border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-foreground">Generate from PDF</h3>
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <input
+                      id="pdf-upload"
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      disabled={isRecording || isGeneratingPrompt}
+                      className="block w-full text-xs text-muted-foreground file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    
+                    {uploadedFile && (
+                      <div className="flex items-center justify-between p-2 bg-muted/20 rounded border">
+                        <span className="text-xs text-muted-foreground truncate">{uploadedFile.name}</span>
+                        <button
+                          onClick={() => setUploadedFile(null)}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={generatePromptFromPDF}
+                      disabled={!uploadedFile || isRecording || isGeneratingPrompt}
+                      className="w-full px-3 py-2 text-xs font-medium bg-primary/10 hover:bg-primary/20 disabled:bg-muted/30 text-primary disabled:text-muted-foreground rounded-lg border border-primary/20 disabled:border-border transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isGeneratingPrompt ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-primary" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Generate AI Prompt
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Preset Prompts */}
                 <div className="grid grid-cols-1 gap-2">
                   {presetPrompts.map((preset) => (
@@ -606,20 +708,32 @@ const LiveAudio: React.FC = () => {
                 />
                 
                 {/* Editor Actions */}
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-between items-center">
                   <button
-                    onClick={handleCustomPromptCancel}
-                    className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={copyPromptToClipboard}
+                    disabled={!tempPrompt.trim()}
+                    className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground disabled:text-muted-foreground/50 transition-colors disabled:cursor-not-allowed flex items-center gap-1.5"
                   >
-                    Cancel
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
                   </button>
-                  <button
-                    onClick={handleCustomPromptSave}
-                    disabled={!tempPrompt.trim() || isRecording}
-                    className="px-4 py-1.5 text-sm bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg transition-colors disabled:cursor-not-allowed"
-                  >
-                    Save
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCustomPromptCancel}
+                      className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCustomPromptSave}
+                      disabled={!tempPrompt.trim() || isRecording}
+                      className="px-4 py-1.5 text-sm bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg transition-colors disabled:cursor-not-allowed"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
