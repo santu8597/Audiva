@@ -3,9 +3,9 @@ import Image from "next/image"
 const testimonials = [
   {
     quote:
-      "The real-time code suggestions from CodeCraft feel like having a senior engineer reviewing every line of code as you write. The accuracy of its recommendations has improved our overall code quality, reduced review time.",
-    name: "Annette Black",
-    company: "Sony",
+      "Our sales team loves how Audiva's AI agents handle initial prospect calls and qualification. We're booking 40% more qualified meetings with the same staff, and our conversion rates have improved significantly.",
+    name: "Jennifer Martinez",
+    company: "GrowthTech Solutions",
     avatar: "/images/avatars/annette-black.png",
     type: "large-teal",
   },

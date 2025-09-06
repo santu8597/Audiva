@@ -107,11 +107,11 @@ export function CTASection() {
         <div className="flex flex-col justify-start items-center gap-4 text-center">
           {/* Updated CTA headline */}
           <h2 className="text-foreground text-4xl md:text-5xl lg:text-[68px] font-semibold leading-tight md:leading-tight lg:leading-[76px] break-words max-w-[435px]">
-            Ship from a prompt
+            Scale conversations with AI
           </h2>
-          {/* Updated CTA description references CodeCraft */}
+          {/* Updated CTA description references Audiva */}
           <p className="text-muted-foreground text-sm md:text-base font-medium leading-[18.20px] md:leading-relaxed break-words max-w-2xl">
-            Generate, preview, download, and deploy—CodeCraft brings your project to life in minutes.
+            Deploy intelligent voice agents, handle unlimited calls, and grow your business—Audiva makes it effortless.
           </p>
         </div>
         {/* Updated CTA button to features section */}
@@ -126,7 +126,7 @@ export function CTASection() {
             className="px-[30px] py-2 bg-secondary text-secondary-foreground text-base font-medium leading-6 rounded-[99px] shadow-[0px_0px_0px_4px_rgba(255,255,255,0.13)] hover:bg-secondary/90 transition-all duration-200"
             size="lg"
           >
-            Generate your project
+            Start your free trial
           </Button>
         </Link>
       </div>

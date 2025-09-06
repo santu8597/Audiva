@@ -12,8 +12,8 @@ export function Header() {
     { name: "Features", href: "#features-section" },
     { name: "Pricing", href: "#pricing-section" },
     { name: "Testimonials", href: "#testimonials-section" },
-    { name: "Audio-agent", href: "/audio" },
-     // Changed from Docs to Testimonials
+    { name: "Voice Demo", href: "/audio" },
+     // Changed from Audio-agent to Voice Demo
   ]
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -30,7 +30,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <span className="text-foreground text-xl font-semibold">CodeCraft</span>
+            <span className="text-foreground text-xl font-semibold">Audiva</span>
           </div>
           <nav className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (

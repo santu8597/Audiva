@@ -8,12 +8,12 @@ export function FooterSection() {
       {/* Left Section: Logo, Description, Social Links */}
       <div className="flex flex-col justify-start items-start gap-8 p-4 md:p-8">
         <div className="flex gap-3 items-stretch justify-center">
-          {/* CodeCraft brand rename */}
-          <div className="text-center text-foreground text-xl font-semibold leading-4">CodeCraft</div>
+          {/* Audiva brand rename */}
+          <div className="text-center text-foreground text-xl font-semibold leading-4">Audiva</div>
         </div>
-        {/* Tailored tagline for prompt-to-project */}
+        {/* Tailored tagline for AI voice assistants */}
         <p className="text-foreground/90 text-sm font-medium leading-[18px] text-left">
-          Generate full projects from a prompt
+          AI-powered voice agents for business growth
         </p>
         <div className="flex justify-start items-start gap-3">
           <a href="#" aria-label="Twitter" className="w-4 h-4 flex items-center justify-center">
@@ -42,10 +42,10 @@ export function FooterSection() {
               Integrations
             </a>
             <a href="#" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Real-time Previews
+              Voice Demo
             </a>
             <a href="#" className="text-foreground text-sm font-normal leading-5 hover:underline">
-              Multi-Agent Coding
+              Analytics
             </a>
           </div>
         </div>

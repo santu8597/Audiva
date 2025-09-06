@@ -6,34 +6,34 @@ import { ChevronDown } from "lucide-react"
 
 const faqData = [
   {
-    question: "What is CodeCraft and who is it for?",
+    question: "What is Audiva and how can it help my business?",
     answer:
-      "CodeCraft is an AI project generator for developers and teams who want to go from idea to deployable app in minutes. Just describe what you need—CodeCraft scaffolds your project with pages, routes, and configuration.",
+      "Audiva is an AI-powered voice assistant platform that helps businesses deploy intelligent voice agents for customer support, sales calls, and onboarding. Our AI agents handle conversations naturally, integrate with your existing tools, and scale your operations without hiring more staff.",
   },
   {
-    question: "How does CodeCraft generate projects from a prompt?",
+    question: "How realistic do the AI voice agents sound?",
     answer:
-      "CodeCraft interprets your prompt, selects suitable stacks and patterns, then generates a complete codebase. You can preview changes in real time, iterate with the AI, and export or deploy when ready.",
+      "Our AI voice agents use advanced natural language processing and voice synthesis to sound incredibly human-like. They can be customized with different personalities, speaking styles, and even accents to match your brand voice and customer preferences.",
   },
   {
-    question: "Can I integrate CodeCraft with my existing tools?",
+    question: "Can Audiva integrate with my existing CRM and business tools?",
     answer:
-      "Yes! Enjoy one-click integrations for GitHub, databases, auth, and more. With flexible MCP connectivity, you can securely manage and configure MCP server access across your toolchain.",
+      "Yes! Audiva offers seamless integrations with popular CRMs like Salesforce, HubSpot, and many other business tools. Our agents can automatically log call details, update customer records, and trigger workflows in your existing systems.",
   },
   {
-    question: "What's included in the free plan?",
+    question: "What's included in the Starter plan?",
     answer:
-      "The free plan includes prompt-to-project generation, real-time preview, one-click integrations (basic), a single MCP server connection, ZIP download, and Vercel deployments with CodeCraft branding.",
+      "The Starter plan includes 1 AI voice agent, 100 calls per month, basic voice personalities, email & phone support, integrations with 3 CRM platforms, and call recordings with transcripts. Perfect for small businesses getting started with AI voice assistance.",
   },
   {
-    question: "How do parallel coding agents work?",
+    question: "How do I customize my AI voice agents for specific use cases?",
     answer:
-      "Parallel agents can work on different tasks in your project simultaneously—speeding up scaffolding, fixes, and enhancements. Launch multiple agents to accelerate complex work.",
+      "You can easily customize your AI agents through our dashboard by defining conversation flows, setting personality traits, uploading knowledge bases, and training them on your specific products or services. Our Growth and Enterprise plans offer advanced customization options.",
   },
   {
-    question: "Is my code secure with CodeCraft?",
+    question: "Is my customer data secure with Audiva?",
     answer:
-      "Absolutely. We use enterprise-grade security, end-to-end encryption, and strict data controls. Your code stays within your environment unless you export or deploy it explicitly.",
+      "Absolutely. We use enterprise-grade security, end-to-end encryption, and strict data privacy controls. All conversations are securely stored and can be configured to meet your specific compliance requirements including GDPR, HIPAA, and SOC 2.",
   },
 ]
 

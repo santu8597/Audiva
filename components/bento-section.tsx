@@ -36,33 +36,33 @@ const BentoCard = ({ title, description, Component }) => (
 export function BentoSection() {
   const cards = [
     {
-      title: "Prompt‑to‑project (no code)",
-      description: "Describe your idea—CodeCraft scaffolds your app with pages, routes, and config.",
+      title: "Smart Voice AI Agents",
+      description: "Deploy natural-sounding AI agents for customer support, sales, and onboarding calls.",
       Component: AiCodeReviews,
     },
     {
-      title: "Real-time preview",
-      description: "See changes instantly as CodeCraft generates and refines your app.",
+      title: "Real-time conversation monitoring",
+      description: "Monitor active calls and get insights on conversation quality and outcomes.",
       Component: RealtimeCodingPreviews,
     },
     {
-      title: "One-click integrations",
-      description: "Connect GitHub, databases, auth, and more without manual setup.",
+      title: "One-click CRM integrations",
+      description: "Connect seamlessly with Salesforce, HubSpot, and your existing business tools.",
       Component: OneClickIntegrationsIllustration,
     },
     {
-      title: "Flexible MCP connectivity",
-      description: "Effortlessly manage and configure MCP server access for your tools.",
+      title: "Custom voice personalities",
+      description: "Train AI agents with your brand voice and specific conversation flows.",
       Component: MCPConnectivityIllustration,
     },
     {
-      title: "Download as ZIP",
-      description: "Export your generated code as a clean ZIP whenever you need.",
+      title: "Multi-language support",
+      description: "Deploy voice agents in multiple languages to serve global customers.",
       Component: ParallelCodingAgents,
     },
     {
-      title: "Deploy to Vercel",
-      description: "Launch instantly—deploy directly from CodeCraft to Vercel.",
+      title: "Analytics & insights",
+      description: "Get detailed call analytics, success metrics, and performance insights.",
       Component: EasyDeployment,
     },
   ]
@@ -74,11 +74,10 @@ export function BentoSection() {
         <div className="self-stretch py-8 md:py-14 flex flex-col justify-center items-center gap-2 z-10">
           <div className="flex flex-col justify-start items-center gap-4">
             <h2 className="w-full max-w-[655px] text-center text-foreground text-4xl md:text-6xl font-semibold leading-tight md:leading-[66px]">
-              Build and deploy from a single prompt
+              AI voice agents for every business need
             </h2>
             <p className="w-full max-w-[600px] text-center text-muted-foreground text-lg md:text-xl font-medium leading-relaxed">
-              CodeCraft turns ideas into full projects with previews, integrations, MCP connectivity, ZIP export, and
-              one‑click deploys.
+              Deploy intelligent voice assistants for sales, support, and onboarding. Customize personalities, integrate with your tools, and scale conversations effortlessly.
             </p>
           </div>
         </div>
