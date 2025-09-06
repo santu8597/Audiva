@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.12",
     "@emotion/is-prop-valid": "latest",
     "@google/genai": "^1.16.0",
     "@hookform/resolvers": "^3.9.1",
@@ -42,6 +43,7 @@
     "@remix-run/react": "latest",
     "@sveltejs/kit": "latest",
     "@vercel/analytics": "latest",
+    "ai": "^5.0.34",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
