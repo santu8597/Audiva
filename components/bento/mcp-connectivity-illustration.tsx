@@ -6,14 +6,122 @@ interface McpConnectivityIllustrationProps {
 }
 
 const McpConnectivityIllustration: React.FC<McpConnectivityIllustrationProps> = ({ className = "" }) => {
-  // Integration data with new SVG paths
+  // Voice icon components as SVGs
+  const VoiceIcon1 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+        fill="hsl(var(--primary))"
+        opacity="0.8"
+      />
+      <path
+        d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.6"
+      />
+    </svg>
+  )
+
+  const VoiceIcon2 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="3" fill="hsl(var(--primary))" opacity="0.8" />
+      <path
+        d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
+  )
+
+  const VoiceIcon3 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 11h2l2-4 4 8 4-8 2 4h2"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.8"
+      />
+      <circle cx="12" cy="11" r="1" fill="hsl(var(--primary))" opacity="1" />
+    </svg>
+  )
+
+  const VoiceIcon4 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M9 9h6v6H9z"
+        fill="hsl(var(--primary))"
+        opacity="0.3"
+        rx="1"
+      />
+      <path
+        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.8"
+      />
+      <circle cx="12" cy="12" r="3" stroke="hsl(var(--primary))" strokeWidth="2" fill="none" opacity="0.6" />
+    </svg>
+  )
+
+  const VoiceIcon5 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"
+        fill="hsl(var(--primary))"
+        opacity="0.8"
+      />
+      <path
+        d="M12 12c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+        fill="hsl(var(--primary))"
+        opacity="0.6"
+      />
+      <path
+        d="M16 8.5c0 .83.67 1.5 1.5 1.5S19 9.33 19 8.5 18.33 7 17.5 7 16 7.67 16 8.5zM21 12c-1.33 0-4 .67-4 2v1h4v-3z"
+        fill="hsl(var(--primary))"
+        opacity="0.4"
+      />
+    </svg>
+  )
+
+  const VoiceIcon6 = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M8.5 14.5A2.5 2.5 0 0 0 11 12H9a2 2 0 0 0-2 2v.5zM16.5 14.5a2 2 0 0 0-2-2H13a2.5 2.5 0 0 0 2.5 2.5v-.5z"
+        fill="hsl(var(--primary))"
+        opacity="0.6"
+      />
+      <circle cx="12" cy="7" r="4" stroke="hsl(var(--primary))" strokeWidth="2" fill="none" opacity="0.8" />
+      <path
+        d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.7"
+      />
+    </svg>
+  )
+
+  // Integration data with voice-related names and SVG components
   const integrations = [
-    { name: "Figma", icon: "/images/mcp-integrations/figma.svg", installed: true },
-    { name: "Shadcn UI", icon: "/images/mcp-integrations/shadcn.svg" },
-    { name: "Next.js", icon: "/images/mcp-integrations/nextjs.svg", installed: true },
-    { name: "Tailwind CSS", icon: "/images/mcp-integrations/tailwind-css.svg" },
-    { name: "Resend", icon: "/images/mcp-integrations/resend.svg", installed: true },
-    { name: "React", icon: "/images/mcp-integrations/react.svg" },
+    { name: "Voice Assistant", icon: <VoiceIcon1 />, installed: true },
+    { name: "Audio Processing", icon: <VoiceIcon2 /> },
+    { name: "Speech Analytics", icon: <VoiceIcon3 />, installed: true },
+    { name: "Call Monitoring", icon: <VoiceIcon4 /> },
+    { name: "Agent Training", icon: <VoiceIcon5 />, installed: true },
+    { name: "Customer Portal", icon: <VoiceIcon6 /> },
   ]
 
   return (
@@ -113,11 +221,7 @@ const McpConnectivityIllustration: React.FC<McpConnectivityIllustrationProps> = 
                     flexShrink: 0,
                   }}
                 >
-                  <img
-                    src={integration.icon || "/placeholder.svg"}
-                    alt={integration.name}
-                    className="w-full h-full object-contain opacity-70 grayscale" // Apply opacity and grayscale
-                  />
+                  {integration.icon}
                 </div>
                 <span
                   style={{

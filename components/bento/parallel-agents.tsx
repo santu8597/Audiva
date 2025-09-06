@@ -90,6 +90,7 @@ const ParallelCodingAgents: React.FC<ParallelCodingAgentsProps> = ({ className =
         background: "linear-gradient(180deg, hsl(var(--card) / 0.4) 0%, transparent 100%)",
         backdropFilter: "blur(8px)",
         borderRadius: "10px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
