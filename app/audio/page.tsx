@@ -24,6 +24,7 @@ const LiveAudio: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
   
   // Tools results state
   const [toolResults, setToolResults] = useState<Array<{
@@ -617,8 +618,34 @@ const LiveAudio: React.FC = () => {
             {!isEditingPrompt ? (
               <div className="space-y-3">
                 {/* Current Prompt Display */}
-                <div className="p-3 bg-muted/30 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground leading-relaxed">{systemPrompt}</p>
+                <div className="bg-muted/30 rounded-lg border border-border">
+                  <div className="p-3">
+                    <p className={`text-sm text-muted-foreground leading-relaxed transition-all duration-200 ${
+                      isPromptExpanded ? '' : 'line-clamp-2'
+                    }`}>
+                      {systemPrompt}
+                    </p>
+                  </div>
+                  
+                  {/* Toggle button - only show if prompt is long enough */}
+                  {systemPrompt.length > 120 && (
+                    <div className="px-3 pb-3">
+                      <button
+                        onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>{isPromptExpanded ? 'Show less' : 'Show more'}</span>
+                        <svg 
+                          className={`w-3 h-3 transform transition-transform ${isPromptExpanded ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* PDF Upload Section for Prompt Generation */}
