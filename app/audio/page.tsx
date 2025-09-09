@@ -111,7 +111,7 @@ const LiveAudio: React.FC = () => {
     nextStartTimeRef.current = outputAudioContext.currentTime
 
     const client = new GoogleGenAI({
-      apiKey: "AIzaSyCF6yaY7zD5XnovoMkkkHRViiji2IRGnZg",
+      apiKey: process.env.NEXT_PUBLIC_GEMINI_KEY,
     })
     clientRef.current = client
 
