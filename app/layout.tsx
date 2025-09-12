@@ -8,10 +8,10 @@ import GlassmorphicNavbar from "../components/glassmorphic-navbar"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "CodeCraft — AI Project Generator",
+  title: "Audiva — AI voice agent",
   description:
-    "Prompt CodeCraft to generate full-stack projects with real-time previews, one-click integrations, flexible MCP connectivity, ZIP export, and instant deploys to Vercel — no code required.",
-  generator: "v0.app",
+    "Empower your business with AI-driven voice agents. Enhance customer interactions, streamline operations, and boost growth with our cutting-edge technology.",
+  generator: "Next.js",
 }
 
 export default function RootLayout({
